@@ -37,6 +37,7 @@ interface FormData {
   };
   holidays: Date[];
   dateSign: Date | undefined;
+  passphrase: string;
 }
 
 const currentDate = new Date();
@@ -70,6 +71,7 @@ const AttendanceForm = () => {
     },
     holidays: [],
     dateSign: undefined,
+    passphrase: "",
   });
 
   const months = [
@@ -123,9 +125,36 @@ const AttendanceForm = () => {
 
     if (!formData.dateRange.from || !formData.dateRange.to) {
       toast({
-        title: "Error",
-        description: "Please select a date range",
+        title: "Gagal!",
+        description: "Tanggal Periode belum terisi",
         variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.passphrase) {
+      toast({
+        title: "Gagal!",
+        description: "Passphare harus terisi",
+        variant: "destructive",
+      });
+    }
+
+    console.log(formData.passphrase);
+    console.log(process.env.MY_PASSPRHASE);
+
+    if (!process.env.MY_PASSPRHASE) {
+      toast({
+        title: "Gagal!",
+        description: "Passphrase belum diatur",
+      });
+      return;
+    }
+
+    if (formData.passphrase != process.env.MY_PASSPRHASE) {
+      toast({
+        title: "Gagal!",
+        description: "Passphrase tidak sesuai",
       });
       return;
     }
@@ -138,12 +167,12 @@ const AttendanceForm = () => {
       });
       toast({
         title: "Sukses!",
-        description: "Report generated successfully",
+        description: "Daftar Hadir generated successfully",
       });
     } catch (error) {
       toast({
         title: "Gagal!",
-        description: "Failed to generate report!",
+        description: "Failed to generate daftar hadir!",
         variant: "destructive",
       });
     }
@@ -232,6 +261,7 @@ const AttendanceForm = () => {
           <Input
             id="nama"
             name="nama"
+            placeholder="Nama Lengkap"
             value={formData.nama}
             onChange={handleInputChange}
             required
@@ -356,7 +386,18 @@ const AttendanceForm = () => {
         />
       </div>
 
-      <Button type="submit" className="w-full bg-slate-800 hover:bg-red-800">
+      <div className="space-y-2">
+        <Label>Phrase</Label>
+        <Input
+          name="passphrase"
+          type="password"
+          placeholder="*********"
+          required
+          onChange={handleInputChange}
+        />
+      </div>
+
+      <Button type="submit" className="w-full bg-stone-500 hover:bg-red-500">
         Unduh
       </Button>
     </form>

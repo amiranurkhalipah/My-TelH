@@ -93,7 +93,7 @@ export const generatePDF = async (data: FormData) => {
   // Add data row
   startY += cellHeight;
   doc.rect(10, startY, 10, cellHeight);
-  doc.text("1", 14, startY + 8);
+  doc.text("1", 14, startY + 7);
   doc.rect(20, startY, 40, cellHeight);
 
   // Check if the name length exceeds 20 characters and split into multiple lines if necessary
