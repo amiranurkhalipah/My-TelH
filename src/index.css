@@ -47,5 +47,5 @@ body {
 }
 
 .gradient-text {
-  @apply bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-red-800 to-red-500 bg-clip-text text-transparent;
 }

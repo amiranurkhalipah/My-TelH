@@ -1,4 +1,4 @@
-import { Merge, FilePlus, BookDashed } from "lucide-react";
+import { Merge, FilePlus, GitPullRequestDraft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {
@@ -17,7 +17,7 @@ const ACCESS_PASS = import.meta.env.VITE_ACCESS_PASS;
 const features = [
   {
     icon: <FilePlus className="w-6 h-6" />,
-    title: "Attendance Generator",
+    title: "Presence Generator",
     description: "Quickly fill the form, enjoy instant PDF results.",
     path: "/attendance-generator",
     requiresPassphrase: true,
@@ -29,8 +29,8 @@ const features = [
     path: "/pdf-merger",
   },
   {
-    icon: <BookDashed className="w-6 h-6" />,
-    title: "and many more soon...",
+    icon: <GitPullRequestDraft className="w-6 h-6" />,
+    title: "and more later...",
     description: "",
     comingSoon: true,
   },
@@ -72,7 +72,7 @@ export const FeatureGrid = () => {
       <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
         The <span className="gradient-text">Tools</span>
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
         {features.map((feature, index) => (
           <div
             key={index}
@@ -83,14 +83,14 @@ export const FeatureGrid = () => {
               feature.path && !feature.comingSoon && handleFeatureClick(feature)
             }
           >
-            <div className="text-blue-400 mb-4">{feature.icon}</div>
+            <div className="text-red-500 mb-4">{feature.icon}</div>
             <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
             <p className="text-gray-400">{feature.description}</p>
           </div>
         ))}
       </div>
       <div className="max-w-4xl mx-auto mt-24 text-center">
-        <div className="p-6 bg-blue-950/30 rounded-lg">
+        <div className="p-6 bg-red-950/30 rounded-lg">
           <p className="text-gray-300 mb-2">
             This tool never sends documents placed by the User out of the User's
             browser.
@@ -106,9 +106,9 @@ export const FeatureGrid = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Access Pass Required</DialogTitle>
+            <DialogTitle>Access Pass</DialogTitle>
             <DialogDescription>
-              Please enter the passphrase to access the feature.
+              Please enter the passphrase to access the pages.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -126,7 +126,7 @@ export const FeatureGrid = () => {
                 className="bg-stone-400 hover:bg-red-500"
                 onClick={handlePassphraseSubmit}
               >
-                Submit
+                Next
               </Button>
             </div>
           </div>
