@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/components/auth/AuthContext";
 
 const ACCESS_PASS = import.meta.env.VITE_ACCESS_PASS;
 
@@ -42,6 +43,7 @@ export const FeatureGrid = () => {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [passphrase, setPassphrase] = useState("");
+  const { setIsAuthorized } = useAuth();
   const [selectedPath, setSelectedPath] = useState("");
 
   const handleFeatureClick = (feature: (typeof features)[0]) => {
@@ -57,6 +59,7 @@ export const FeatureGrid = () => {
     if (passphrase === ACCESS_PASS) {
       setIsDialogOpen(false);
       setPassphrase("");
+      setIsAuthorized(true);
       navigate(selectedPath);
     } else {
       toast({
