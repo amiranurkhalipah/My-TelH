@@ -125,7 +125,7 @@ const AttendanceForm = () => {
 
     if (!formData.dateRange.from || !formData.dateRange.to) {
       toast({
-        title: "Gagal!",
+        title: "Opps!",
         description: "Tanggal Periode belum terisi",
         variant: "destructive",
       });
@@ -134,27 +134,26 @@ const AttendanceForm = () => {
 
     if (!formData.passphrase) {
       toast({
-        title: "Gagal!",
+        title: "Opps!",
         description: "Passphare harus terisi",
         variant: "destructive",
       });
     }
 
-    console.log(formData.passphrase);
-    console.log(process.env.MY_PASSPRHASE);
-
-    if (!process.env.MY_PASSPRHASE) {
+    if (!import.meta.env.VITE_PASSPHRASE) {
       toast({
-        title: "Gagal!",
+        title: "Opps!",
         description: "Passphrase belum diatur",
+        variant: "destructive",
       });
       return;
     }
 
-    if (formData.passphrase != process.env.MY_PASSPRHASE) {
+    if (formData.passphrase != import.meta.env.VITE_PASSPHRASE) {
       toast({
-        title: "Gagal!",
-        description: "Passphrase tidak sesuai",
+        title: "Opps!",
+        description: "Passphrase tidak valid",
+        variant: "destructive",
       });
       return;
     }
@@ -397,7 +396,7 @@ const AttendanceForm = () => {
         />
       </div>
 
-      <Button type="submit" className="w-full bg-stone-500 hover:bg-red-500">
+      <Button type="submit" className="w-full bg-stone-300 hover:bg-red-500">
         Unduh
       </Button>
     </form>

@@ -1,5 +1,18 @@
 import { Merge, FilePlus, BookDashed } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+
+const ACCESS_PASS = import.meta.env.VITE_ACCESS_PASS;
 
 const features = [
   {
@@ -7,6 +20,7 @@ const features = [
     title: "Attendance Generator",
     description: "Quickly fill the form, enjoy instant PDF results.",
     path: "/attendance-generator",
+    requiresPassphrase: true,
   },
   {
     icon: <Merge className="w-6 h-6" />,
@@ -25,11 +39,38 @@ const features = [
 export const FeatureGrid = () => {
   const navigate = useNavigate();
 
+  const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [passphrase, setPassphrase] = useState("");
+  const [selectedPath, setSelectedPath] = useState("");
+
+  const handleFeatureClick = (feature: (typeof features)[0]) => {
+    if (feature.requiresPassphrase) {
+      setSelectedPath(feature.path || "");
+      setIsDialogOpen(true);
+    } else if (feature.path && !feature.comingSoon) {
+      navigate(feature.path);
+    }
+  };
+
+  const handlePassphraseSubmit = () => {
+    if (passphrase === ACCESS_PASS) {
+      setIsDialogOpen(false);
+      setPassphrase("");
+      navigate(selectedPath);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Opps!",
+        description: "Please enter the correct passphrase to access the page.",
+      });
+    }
+  };
+
   return (
-    <div className="py-20 px-4">
+    <div className="py-4 px-4">
       <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-        Everything Need for{" "}
-        <span className="gradient-text">TLH Administration</span>
+        The <span className="gradient-text">Tools</span>
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
         {features.map((feature, index) => (
@@ -39,7 +80,7 @@ export const FeatureGrid = () => {
               feature.comingSoon ? "opacity-70" : ""
             } ${feature.path ? "cursor-pointer" : ""}`}
             onClick={() =>
-              feature.path && !feature.comingSoon && navigate(feature.path)
+              feature.path && !feature.comingSoon && handleFeatureClick(feature)
             }
           >
             <div className="text-blue-400 mb-4">{feature.icon}</div>
@@ -48,6 +89,49 @@ export const FeatureGrid = () => {
           </div>
         ))}
       </div>
+      <div className="max-w-4xl mx-auto mt-24 text-center">
+        <div className="p-6 bg-blue-950/30 rounded-lg">
+          <p className="text-gray-300 mb-2">
+            This tool never sends documents placed by the User out of the User's
+            browser.
+          </p>
+          <p className="text-gray-300">
+            All processes carried out in this tool are 100% done on the client
+            side (your side), we never send the files that the User places out
+            of the User's browser.
+          </p>
+        </div>
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Access Pass Required</DialogTitle>
+            <DialogDescription>
+              Please enter the passphrase to access the feature.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              type="password"
+              value={passphrase}
+              onChange={(e) => setPassphrase(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handlePassphraseSubmit()}
+            />
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-stone-400 hover:bg-red-500"
+                onClick={handlePassphraseSubmit}
+              >
+                Submit
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

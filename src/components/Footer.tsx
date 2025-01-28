@@ -12,7 +12,7 @@ export const Footer = () => {
             href="https://it.telkomuniversity.ac.id/bagian-devti/"
             className="text-gray-400 hover:text-white transition-colors"
           >
-            Profile
+            Site
           </a>
         </div>
       </div>
