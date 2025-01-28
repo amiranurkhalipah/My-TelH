@@ -12,8 +12,8 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [react()].filter(Boolean),
     define: {
-      // __APP_ENV__: process.env.VITE_VERCEL_ENV,
-      __APP_ENV__: JSON.stringify(env.APP_ENV),
+      __APP_ENV__: process.env.VITE_VERCEL_ENV,
+      // __APP_ENV__: JSON.stringify(env.APP_ENV),
     },
     resolve: {
       alias: {
