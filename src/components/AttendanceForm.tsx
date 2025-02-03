@@ -11,7 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Plus, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { generatePDF } from "@/lib/pdfGenerator";
 import {
@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface FormData {
   kategoriTLH: string;
@@ -30,17 +31,19 @@ interface FormData {
     month: string;
     year: string;
   };
-  nama: string;
+  names: string[];
   dateRange: {
     from: Date | undefined;
     to: Date | undefined;
   };
   holidays: Date[];
+  holidaysWeekend: boolean;
   dateSign: Date | undefined;
   passphrase: string;
 }
 
 const currentDate = new Date();
+let nextDate = new Date();
 
 const AttendanceForm = () => {
   const { toast } = useToast();
@@ -55,7 +58,7 @@ const AttendanceForm = () => {
       year: format(
         new Date(
           currentDate.getFullYear(),
-          currentDate.getMonth() + 1,
+          currentDate.getMonth(),
           currentDate.getDate()
         ),
         "yyyy",
@@ -64,12 +67,13 @@ const AttendanceForm = () => {
         }
       ),
     },
-    nama: "",
+    names: [""],
     dateRange: {
       from: undefined,
       to: undefined,
     },
     holidays: [],
+    holidaysWeekend: true,
     dateSign: undefined,
     passphrase: "",
   });
@@ -108,6 +112,77 @@ const AttendanceForm = () => {
     setFormData((prev) => ({
       ...prev,
       dateRange: range,
+      dateSign: range.to,
+    }));
+    nextDate = new Date(
+      range.from.getFullYear(),
+      range.from.getMonth() + 1,
+      range.from.getDay()
+    );
+  };
+
+  const addAttendee = () => {
+    setFormData((prev) => ({
+      ...prev,
+      names: [...formData.names, ""],
+    }));
+  };
+
+  const removeAttendee = (index: number) => {
+    if (formData.names.length === 1) {
+      toast({
+        title: "Opps!",
+        description: "Minimal harus terisi 1 nama",
+        variant: "destructive",
+      });
+      return;
+    }
+    const newAttendees = formData.names.filter((_, i) => i !== index);
+    setFormData((prev) => ({
+      ...prev,
+      names: newAttendees,
+    }));
+  };
+
+  const updateAttendee = (index: number, value: string) => {
+    const newAttendees = [...formData.names];
+    newAttendees[index] = value;
+    setFormData((prev) => ({
+      ...prev,
+      names: newAttendees,
+    }));
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData("text");
+    const names = pastedText
+      .split(/[\n,\t]/)
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0);
+
+    if (names.length > 0) {
+      const currentIndex = Number((e.target as HTMLInputElement).dataset.index);
+      const newAttendees = [...formData.names];
+      newAttendees[currentIndex] = names[0];
+
+      const remainingNames = names.slice(1);
+
+      setFormData((prev) => ({
+        ...prev,
+        names: [...newAttendees, ...remainingNames],
+      }));
+
+      toast({
+        description: `Bertambah ${names.length} nama`,
+      });
+    }
+  };
+
+  const handleHolidayWeekend = (checked: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      holidaysWeekend: checked,
     }));
   };
 
@@ -122,6 +197,15 @@ const AttendanceForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.names.some((name) => !name.trim())) {
+      toast({
+        title: "Opps!",
+        description: "Sepertinya ada kolom nama belum terisi",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (!formData.dateRange.from || !formData.dateRange.to) {
       toast({
@@ -161,17 +245,18 @@ const AttendanceForm = () => {
     try {
       await generatePDF({
         ...formData,
+        nama: formData.names,
         periode: `${formData.periode.month} ${formData.periode.year}`,
         dateSign: format(formData.dateSign, "PPP", { locale: id }),
       });
       toast({
         title: "Sukses!",
-        description: "Daftar Hadir generated successfully",
+        description: "Daftar Hadir berhasil diunduh.",
       });
     } catch (error) {
       toast({
         title: "Gagal!",
-        description: "Failed to generate daftar hadir!",
+        description: "Tidak bisa mengunduh daftar hadir!",
         variant: "destructive",
       });
     }
@@ -255,16 +340,40 @@ const AttendanceForm = () => {
             </Select>
           </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="nama">Nama</Label>
-          <Input
-            id="nama"
-            name="nama"
-            placeholder="Nama Lengkap"
-            value={formData.nama}
-            onChange={handleInputChange}
-            required
-          />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium mb-2">Nama</label>
+        <div className="space-y-3">
+          {formData.names.map((attendee, index) => (
+            <div key={index} className="flex gap-2">
+              <Input
+                value={attendee}
+                onChange={(e) => updateAttendee(index, e.target.value)}
+                onPaste={handlePaste}
+                data-index={index}
+                placeholder="Nama Lengkap atau `paste` beberapa nama"
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => removeAttendee(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={addAttendee}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Tambah
+          </Button>
         </div>
       </div>
 
@@ -318,13 +427,7 @@ const AttendanceForm = () => {
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
-                month={
-                  new Date(
-                    currentDate.getFullYear(),
-                    currentDate.getMonth() + 1,
-                    currentDate.getDate()
-                  )
-                }
+                month={nextDate}
                 mode="single"
                 selected={formData.dateRange.to}
                 onSelect={(date) =>
@@ -353,13 +456,6 @@ const AttendanceForm = () => {
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
-                month={
-                  new Date(
-                    currentDate.getFullYear(),
-                    currentDate.getMonth() + 1,
-                    currentDate.getDate()
-                  )
-                }
                 mode="single"
                 selected={formData.dateSign}
                 onSelect={(date) =>
@@ -377,6 +473,14 @@ const AttendanceForm = () => {
 
       <div className="space-y-2">
         <Label>Hari Libur</Label>
+        <div className="flex items-center gap-2">
+          <Label className="text-xs">Akhir Pekan?</Label>
+          <Checkbox
+            className="data-[state=checked]:bg-slate-100 border-color-slate-300"
+            defaultChecked={formData.holidaysWeekend}
+            onCheckedChange={handleHolidayWeekend}
+          />
+        </div>
         <Calendar
           mode="multiple"
           selected={formData.holidays}
