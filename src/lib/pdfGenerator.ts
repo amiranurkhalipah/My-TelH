@@ -102,9 +102,9 @@ export const generatePDF = async (data: FormData) => {
     doc.text("1", 14, startY + 7);
     doc.rect(20, startY, 40, cellHeight);
 
-    // Check if the name length exceeds 20 characters and split into multiple lines if necessary
+    // Check if the name length exceeds 16 characters and split into multiple lines if necessary
     const nameLines =
-      nama.length > 20 ? nama.match(/.{1,20}(?=\s|$)|\S+$/g) : [nama];
+      nama.length > 16 ? nama.match(/.{1,20}(?=\s|$)|\S+$/g) : [nama];
     nameLines.forEach((line, index) => {
       doc.text(line.trim(), 22, startY + 7 + index * 5);
     });
