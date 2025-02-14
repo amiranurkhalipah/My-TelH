@@ -26,8 +26,6 @@ export const generatePDF = async (data: FormData) => {
   });
 
   for (let i = 0; i < data.nama.length; i++) {
-    console.log(data.nama[i]);
-
     let nama = data.nama[i];
 
     doc.setFont("helvetica");
@@ -102,9 +100,9 @@ export const generatePDF = async (data: FormData) => {
     doc.text("1", 14, startY + 7);
     doc.rect(20, startY, 40, cellHeight);
 
-    // Check if the name length exceeds 13 characters and split into multiple lines if necessary
+    // Check if the name length exceeds 15 characters and split into multiple lines if necessary
     const nameLines =
-      nama.length > 13 ? nama.match(/.{1,20}(?=\s|$)|\S+$/g) : [nama];
+      nama.length > 15 ? nama.match(/.{1,15}(?=\s|$)|\S+$/g) : [nama];
     nameLines.forEach((line, index) => {
       doc.text(line.trim(), 22, startY + 7 + index * 5);
     });

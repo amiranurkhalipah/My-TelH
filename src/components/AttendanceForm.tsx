@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { eachDayOfInterval, format, isWeekend } from "date-fns";
 import { id } from "date-fns/locale";
 import {
   Popover,
@@ -92,6 +92,8 @@ const AttendanceForm = () => {
     "November",
     "Desember",
   ];
+
+  const ACCESS_PASS = import.meta.env.VITE_PASSPHRASE;
 
   const years = Array.from({ length: 5 }, (_, i) =>
     (new Date().getFullYear() - 1 + i).toString()
@@ -233,7 +235,7 @@ const AttendanceForm = () => {
       return;
     }
 
-    if (formData.passphrase != import.meta.env.VITE_PASSPHRASE) {
+    if (formData.passphrase != ACCESS_PASS) {
       toast({
         title: "Opps!",
         description: "Passphrase tidak valid",
@@ -243,6 +245,25 @@ const AttendanceForm = () => {
     }
 
     try {
+      const days = eachDayOfInterval({
+        start: formData.dateRange.from,
+        end: formData.dateRange.to,
+      });
+      let countDays = days.length;
+      days.forEach((day, index) => {
+        if (
+          formData.holidays.some(
+            (holiday) => holiday.getTime() === day.getTime()
+          )
+        ) {
+          countDays--;
+        } else {
+          if (isWeekend(day) && formData.holidaysWeekend) {
+            countDays--;
+          }
+        }
+      });
+
       await generatePDF({
         ...formData,
         nama: formData.names,
@@ -251,7 +272,7 @@ const AttendanceForm = () => {
       });
       toast({
         title: "Sukses!",
-        description: "Daftar Hadir berhasil diunduh.",
+        description: `Daftar Hadir untuk ${countDays} hari berhasil diunduh.`,
       });
     } catch (error) {
       toast({
