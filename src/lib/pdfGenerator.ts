@@ -126,7 +126,7 @@ export const generatePDF = async (data: FormData) => {
 
     // Add signature section
     const signatureY = startY + 40;
-    const dateSign = format(data.dateSign, "d MMMM yyyy");
+    const dateSign = data.dateSign;
 
     doc.text("Mengetahui/Menyetujui:", 27, signatureY);
     doc.text("Kepala Bagian Pengembangan Produk TI", 15, signatureY + 7);
