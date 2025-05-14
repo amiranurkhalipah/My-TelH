@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import { format, eachDayOfInterval, isWeekend } from "date-fns";
+import { id } from "date-fns/locale";
 
 interface FormData {
   kategoriTLH: string;
@@ -88,7 +89,7 @@ export const generatePDF = async (data: FormData) => {
       const textY = startY + 19;
       const angleInRadians = (90 * Math.PI) / 180;
 
-      doc.text(format(day, "dd MMM yy"), textX, textY, {
+      doc.text(format(day, "dd MMM yy", { locale: id }), textX, textY, {
         angle: 90,
       });
     });
